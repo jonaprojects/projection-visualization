@@ -18,7 +18,7 @@ class VectorScene {
  }
  begin(state,width,height){
   this.group.traverse(obj=>{obj.geometry?.dispose();if(obj.material)for(const m of [].concat(obj.material))m.dispose();});
-  this.group.clear();this.tags=[];this.labels.replaceChildren();this.width=width;this.height=height;
+  this.group.clear();this.tags=[];this.labels.replaceChildren();this.width=width;this.height=height;this.state=state;
   if(this.canvas.width!==Math.round(width*this.renderer.getPixelRatio())||this.canvas.height!==Math.round(height*this.renderer.getPixelRatio()))this.renderer.setSize(width,height,false);
   const aspect=width/height,distance=15*Math.max(1,1/aspect)*48/state.zoom;
   this.camera=state.cameraView&&state.cameraView!=='perspective'?this.orthographic:this.perspective;
@@ -51,13 +51,16 @@ class VectorScene {
   if(label)this.label(end.toArray(),label,style.color,[11,-13],true);
  }
  plane(q1,q2){
-  const points=[[-4,-4],[4,-4],[4,4],[-4,4]].map(([a,b])=>q1.map((x,i)=>x*a+q2[i]*b));
+  // A finite patch represents the infinite subspace. Always include the
+  // projected vector and the basis tips so no on-plane point appears outside it.
+  const extent=Math.max(4,...[this.state.v,this.state.u,this.state.b].flatMap(v=>[q1,q2].map(q=>Math.abs(v.reduce((s,x,i)=>s+x*q[i],0)))))+.5;
+  const points=[[-extent,-extent],[extent,-extent],[extent,extent],[-extent,extent]].map(([a,b])=>q1.map((x,i)=>x*a+q2[i]*b));
   const geom=new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute([points[0],points[1],points[2],points[0],points[2],points[3]].flat(),3));geom.computeVertexNormals();
   const mesh=new THREE.Mesh(geom,new THREE.MeshBasicMaterial({color:0x3c80bd,opacity:.13,transparent:true,side:THREE.DoubleSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1}));mesh.renderOrder=-1;this.group.add(mesh);
   const combine=(a,b)=>q1.map((x,j)=>x*a+q2[j]*b);
-  for(let i=-4;i<=4;i++){this.line(combine(-4,i),combine(4,i),'#3c80bd40');this.line(combine(i,-4),combine(i,4),'#3c80bd40');}
+  for(let i=Math.ceil(-extent);i<=Math.floor(extent);i++){this.line(combine(-extent,i),combine(extent,i),'#3c80bd40');this.line(combine(i,-extent),combine(i,extent),'#3c80bd40');}
   points.forEach((p,i)=>this.line(p,points[(i+1)%4],'#3c80bd90'));
-  this.label(combine(-3.5,3.5),'W','#3c80bd');
+  this.label(combine(-extent*.75,extent*.75),'W','#3c80bd');
  }
  guide(v){
   if(Math.abs(v[2])<1e-5)return;
