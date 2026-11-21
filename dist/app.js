@@ -1,7 +1,7 @@
 const {add,sub,mul,dot,norm,project,orthonormalize}=ProjectionMath;
 const $=id=>document.getElementById(id),canvas=$('canvas'),ctx=canvas.getContext('2d');
 const colors={v:'#9562cb',u:'#3c80bd',p:'#16846a',r:'#dc8950',q:'#16846a',grid:'#e4ebe7',axis:'#99afa5'};
-let state={mode:'vector',dim:2,v:[3,3,4],u:[4,1,1],b:[-1,3,1],c:[1,-1,3],step:0,subdim:2,yaw:-.9,pitch:.55,zoom:48,depthGuides:true};
+let state={mode:'vector',dim:2,v:[3,3,4],u:[5,1,1],b:[-1,3,1],c:[1,-1,3],step:0,subdim:2,yaw:-.9,pitch:.55,zoom:48,depthGuides:true};
 const viewport=$('viewport');
 let use3D=false;
 let timer=null,steps=[],geometry={},width=600,height=445,drag=null,hitTargets=[];
@@ -135,7 +135,7 @@ function draw(){
 function resize(){const r=viewport.getBoundingClientRect();width=r.width;height=r.height;const d=devicePixelRatio||1;canvas.width=width*d;canvas.height=height*d;ctx.setTransform(d,0,0,d,0,0);draw();}
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{state.mode=b.dataset.mode;setup();});
 document.querySelectorAll('[data-dim]').forEach(b=>b.onclick=()=>{state.dim=+b.dataset.dim;state.subdim=state.dim===3?2:1;setup();});
-$('reset').onclick=()=>{Object.assign(state,{v:[3,3,4],u:[4,1,1],b:[-1,3,1],c:[1,-1,3],yaw:-.9,pitch:.55,zoom:48,cameraView:'perspective'});$('zoom').value=48;$('camera-view').value='perspective';setup();};
+$('reset').onclick=()=>{Object.assign(state,{v:[3,3,4],u:[5,1,1],b:[-1,3,1],c:[1,-1,3],yaw:-.9,pitch:.55,zoom:48,cameraView:'perspective'});$('zoom').value=48;$('camera-view').value='perspective';setup();};
 $('view-reset').onclick=()=>{state.yaw=-.9;state.pitch=.55;state.cameraView='perspective';$('camera-view').value='perspective';const keys=state.mode==='gram'?['u','v',...(state.dim===3?['c']:[])]:['u','v',...(state.mode==='subspace'&&state.subdim===2?['b']:[])];const max=Math.max(1,...keys.map(k=>norm(active(state[k]))),geometry.p?norm(geometry.p):0);state.zoom=state.dim===3?Math.max(10,Math.min(75,220/max)):Math.max(10,Math.min(65,Math.min(width,height)*.36/max));$('zoom').value=state.zoom;draw();};
 $('zoom').oninput=e=>{state.zoom=+e.target.value;draw();};
 $('step-range').oninput=e=>{stop();state.step=+e.target.value;update();};
