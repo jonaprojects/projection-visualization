@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore vector projections, subspaces, and Gram–Schmidt through interactive 2D and 3D geometry.">
+  <title>Projection Lab — See linear algebra</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><a class="brand" href="./"><span class="brand-mark">⊥</span> Projection Lab</a><span class="header-note">LINEAR ALGEBRA, MADE VISIBLE</span><button id="reset">Reset example</button></header>
+<main>
+  <section class="intro"><div><p class="eyebrow">AN INTERACTIVE FIELD GUIDE</p><h1>A new perspective<br>on <em>projections.</em></h1><p class="lead">Find the part that points along a direction.<br>Then see how perpendicular directions become a basis.</p></div><div class="intro-note"><span>v = p + r</span><p>One vector.<br>Two perpendicular pieces.</p></div></section>
+  <section class="lab" aria-label="Interactive projection lab">
+    <div class="toolbar"><nav aria-label="Example"><button data-mode="vector" class="active">Vector onto vector</button><button data-mode="subspace">Vector onto subspace</button><button data-mode="gram">Gram–Schmidt</button></nav><div class="dimensions" aria-label="Dimensions"><button data-dim="2" class="active" aria-pressed="true">2D</button><button data-dim="3" aria-pressed="false">3D</button></div></div>
+    <div class="workspace"><div class="scene"><div class="scene-top"><span id="scene-title">A vector and its shadow</span><span id="space-label">ℝ²</span></div><canvas id="canvas" aria-label="Interactive vector diagram. Edit coordinates using the adjacent inputs." role="img"></canvas><div class="scene-bottom"><span id="hint">Drag vector tips to explore</span><div><button id="view-reset" title="Restore camera and scale">Fit view</button><label>Zoom <input id="zoom" aria-label="Diagram zoom" type="range" min="25" max="85" value="48"></label></div></div><div class="legend" id="legend"></div></div>
+    <aside><div class="aside-heading"><p class="eyebrow" id="chapter">THE PROJECTION</p><h2 id="panel-title">How much of v is along u?</h2><p id="explanation"></p></div><div id="inputs"></div><div id="stepper" hidden><div class="step-header"><span id="step-count"></span><button id="play">Play steps</button></div><input id="step-range" aria-label="Gram–Schmidt step" type="range" min="0" value="0"><h3 id="step-title"></h3><p id="step-copy"></p><div class="step-actions"><button id="prev">Previous</button><button id="next">Next step</button></div></div><div class="equation" id="equation" aria-live="polite"></div><div class="metrics" id="metrics"></div><p id="warning" role="status"></p></aside></div>
+  </section>
+  <section class="insights"><article><span class="insight-symbol">↗</span><h3>Keep the parallel part</h3><p>A projection is the closest vector in a line or subspace. The leftover points perpendicular to it.</p></article><article><span class="insight-symbol">⊥</span><h3>Subtract the overlap</h3><p>Gram–Schmidt removes the projections onto directions already found. What remains is orthogonal to them.</p></article><article><span class="insight-symbol">1</span><h3>Make it unit length</h3><p>Divide each nonzero remainder by its length. The result is an orthonormal system: perpendicular, unit-length vectors.</p></article></section>
+  <footer>Move a vector. Follow its shadow. Build your intuition.<span>Projection Lab · Euclidean inner product</span></footer>
+</main><script src="math.js"></script><script src="app.js"></script>
+</body></html>
