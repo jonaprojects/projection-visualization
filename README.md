@@ -9,3 +9,9 @@ Drag vector tips in 2D; orbit the perspective camera by dragging in 3D (or focus
 Gram–Schmidt shows the input, each projection subtraction, normalization, and final orthonormal system. Projection arrows are drawn head-to-tail so the decomposition is visible. The calculations use the Euclidean inner product.
 
 Formulas are authored in LaTeX and rendered with locally bundled KaTeX 0.16.11, including accessible MathML. Three.js 0.160.1 provides 3D rendering. Vendor licenses are included in `dist/vendor/`. No CDN connection is required for formulas or graphics. Run `node verify.cjs` for numerical, formula, and geometry checks.
+
+## GitHub Pages
+
+The workflow in `.github/workflows/pages.yml` publishes `dist/` on every push to `main`, or when manually dispatched. In the GitHub repository's Settings → Pages, the publishing source must be **GitHub Actions**. The workflow uses the `github-pages` environment and the standard Pages permissions; no deployment secret is needed.
+
+All asset links are relative, so the site works at a project URL such as `https://jonaprojects.github.io/projection-visualization/` as well as at a custom domain. Only the browser assets in `dist/` are published.
