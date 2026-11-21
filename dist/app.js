@@ -23,7 +23,7 @@ function setup(){
  $('inputs').dataset.gram=String(state.mode==='gram');
  if(state.mode==='vector'){
   $('scene-title').textContent='A vector and its shadow';$('chapter').textContent='THE PROJECTION';$('panel-title').textContent='How much of v is along u?';
-  $('explanation').innerHTML=`Drop a perpendicular from ${mathHTML('v')} to the line through ${mathHTML('u')}. Its foot is the projection ${mathHTML('p')}; the leftover is ${mathHTML('r=v-p')}.`;
+  $('explanation').innerHTML=`Drop a perpendicular from ${mathHTML('v')} to the line through ${mathHTML('u')}. The projection is ${mathHTML('v_{\\mathrm{proj}}=\\operatorname{proj}_u(v)')}; the leftover is ${mathHTML('v-v_{\\mathrm{proj}}')}.`;
   $('inputs').innerHTML=row('v · source','v',colors.v)+row('u · target direction','u',colors.u);
  }else if(state.mode==='subspace'){
   $('scene-title').textContent='The closest vector in a subspace';$('chapter').textContent='THE SUBSPACE';$('panel-title').textContent='A shadow on a whole space';
@@ -57,18 +57,18 @@ function update(){
  const v=active(state.v),u=active(state.u);$('warning').textContent='';geometry={v,u};
  if(state.mode==='vector'){
   const p=project(v,u);geometry.p=p;geometry.r=p?sub(v,p):null;
-  $('equation').innerHTML=mathBlock(String.raw`p=\operatorname{proj}_u(v)=\frac{\langle v,u\rangle}{\langle u,u\rangle}u`)+(p?'<div class="equation-divider"></div>'+mathBlock('v=p+r')+mathBlock(`${columnTex(v.slice(0,state.dim))}=${columnTex(p.slice(0,state.dim))}+${columnTex(geometry.r.slice(0,state.dim))}`):'');
-  $('metrics').innerHTML=p?metric('Projection length',mathHTML(`\\lVert p\\rVert=${fmt(norm(p))}`))+metric('Remainder length',mathHTML(`\\lVert r\\rVert=${fmt(norm(geometry.r))}`))+metric('Perpendicular',mathHTML(`\\langle r,u\\rangle=${fmt(dot(geometry.r,u))}`)):'';
+  $('equation').innerHTML=mathBlock(String.raw`v_{\mathrm{proj}}=\operatorname{proj}_u(v)`)+mathBlock(String.raw`v_{\mathrm{proj}}=\frac{\langle v,u\rangle}{\langle u,u\rangle}u`)+(p?'<div class="equation-divider"></div>'+mathBlock(String.raw`v=v_{\mathrm{proj}}+(v-v_{\mathrm{proj}})`)+mathBlock(`${columnTex(v.slice(0,state.dim))}=${columnTex(p.slice(0,state.dim))}+${columnTex(geometry.r.slice(0,state.dim))}`):'');
+  $('metrics').innerHTML=p?metric('Projection length',mathHTML(`\\lVert v_{\\mathrm{proj}}\\rVert=${fmt(norm(p))}`))+metric('Remainder length',mathHTML(`\\lVert v-v_{\\mathrm{proj}}\\rVert=${fmt(norm(geometry.r))}`))+metric('Perpendicular',mathHTML(`\\langle v-v_{\\mathrm{proj}},u\\rangle=${fmt(dot(geometry.r,u))}`)):'';
   if(!p)$('warning').textContent='The target direction u is zero. Give it a nonzero coordinate to define a line.';
-  legend([['Source v',colors.v],['Direction u',colors.u],['Projection p',colors.p],['Remainder r',colors.r]]);
+  legend([['Source v',colors.v],['Direction u',colors.u],['Projection v_proj',colors.p],['Remainder v − v_proj',colors.r]]);
  }else if(state.mode==='subspace'){
   const basis=[u,...(state.subdim===2?[active(state.b)]:[])],result=orthonormalize(basis);
   const parts=result.basis.map(q=>mul(q,dot(v,q))),p=parts.reduce(add,[0,0,0]);
   Object.assign(geometry,{p,r:sub(v,p),basis:result.basis,rawBasis:basis,parts});
-  $('equation').innerHTML=mathBlock(String.raw`p=\operatorname{proj}_W(v)=\sum_{j=1}^{d}\langle v,q_j\rangle q_j`)+`<small>${mathHTML('q_1,\\ldots,q_d')} form an orthonormal basis for ${mathHTML('W')}.</small><div class="equation-divider"></div>`+mathBlock(`p=${parts.map(p=>columnTex(p.slice(0,state.dim))).join('+')||columnTex([0,0].slice(0,state.dim))}`)+mathBlock(`p=${columnTex(p.slice(0,state.dim))}`);
-  $('metrics').innerHTML=metric('Actual dimension',mathHTML(`\\dim W=${result.basis.length}`))+metric('Distance to W',mathHTML(`\\lVert r\\rVert=${fmt(norm(geometry.r))}`))+metric('Orthogonality error',mathHTML(`\\max_j |\\langle r,q_j\\rangle|=${fmt(Math.max(0,...result.basis.map(q=>Math.abs(dot(geometry.r,q)))))}`));
+  $('equation').innerHTML=mathBlock(String.raw`v_{\mathrm{proj}}=\operatorname{proj}_W(v)`)+mathBlock(String.raw`v_{\mathrm{proj}}=\sum_{j=1}^{d}\langle v,q_j\rangle q_j`)+`<small>${mathHTML('q_1,\\ldots,q_d')} form an orthonormal basis for ${mathHTML('W')}.</small><div class="equation-divider"></div>`+mathBlock(`v_{\\mathrm{proj}}=${parts.map(p=>columnTex(p.slice(0,state.dim))).join('+')||columnTex(Array(state.dim).fill(0))}`)+mathBlock(`v_{\\mathrm{proj}}=${columnTex(p.slice(0,state.dim))}`);
+  $('metrics').innerHTML=metric('Actual dimension',mathHTML(`\\dim W=${result.basis.length}`))+metric('Distance to W',mathHTML(`\\lVert v-v_{\\mathrm{proj}}\\rVert=${fmt(norm(geometry.r))}`))+metric('Orthogonality error',mathHTML(`\\max_j |\\langle v-v_{\\mathrm{proj}},q_j\\rangle|=${fmt(Math.max(0,...result.basis.map(q=>Math.abs(dot(geometry.r,q)))))}`));
   if(result.basis.length<basis.length)$('warning').textContent='The supplied basis is dependent. Its actual span is shown; redundant directions are skipped.';
-  legend([['Source v',colors.v],['Subspace W',colors.u],['Projection sum p',colors.p],['Remainder r',colors.r]]);
+  legend([['Source v',colors.v],['Subspace W',colors.u],['Projection v_proj',colors.p],['Remainder v − v_proj',colors.r]]);
  }else{
   const vectors=[u,v,...(state.dim===3?[active(state.c)]:[])],result=orthonormalize(vectors);steps=buildSteps(result.records);
   state.step=Math.min(state.step,steps.length-1);const step=steps[state.step];Object.assign(geometry,{vectors,result,step});
@@ -82,14 +82,14 @@ function update(){
  }
  draw();
 }
-function legend(items){$('legend').innerHTML=items.map(([name,c])=>`<span><i style="--c:${c}"></i>${name}</span>`).join('');}
+function legend(items){$('legend').innerHTML=items.map(([name,c])=>`<span><i style="--c:${c}"></i>${name.replace('v − v_proj',mathHTML('v-v_{\\mathrm{proj}}')).replace('v_proj',mathHTML('v_{\\mathrm{proj}}'))}</span>`).join('');}
 function screen(v){
  let x=v[0],y=v[1],z=v[2]||0;
  if(state.dim===3){const a=state.yaw,b=state.pitch;const xx=Math.cos(a)*x-Math.sin(a)*y,yy=Math.sin(a)*x+Math.cos(a)*y;x=xx;y=Math.cos(b)*z-Math.sin(b)*yy;}
  return [width*.47+x*state.zoom,height*.55-y*state.zoom];
 }
 function line(a,b,color,w=1,dash=[]){if(use3D){window.vectorScene.line(a,b,color,w,dash);return;}const p=screen(a),q=screen(b);ctx.beginPath();ctx.setLineDash(dash);ctx.moveTo(...p);ctx.lineTo(...q);ctx.strokeStyle=color;ctx.lineWidth=w;ctx.stroke();ctx.setLineDash([]);}
-function textAt(v,label,color,offset=[10,-10]){if(use3D){window.vectorScene.label(v,label,color,offset);return;}const p=screen(v);ctx.font='600 14px DM Sans, sans-serif';ctx.fillStyle=color;ctx.fillText(label,Math.max(6,Math.min(width-65,p[0]+offset[0])),Math.max(18,Math.min(height-7,p[1]+offset[1])));}
+function textAt(v,label,color,offset=[10,-10]){if(use3D){window.vectorScene.label(v,label,color,offset);return;}const p=screen(v);label=label.replaceAll('v_proj','vₚᵣₒⱼ');ctx.font='600 14px DM Sans, sans-serif';ctx.fillStyle=color;const labelWidth=ctx.measureText(label)?.width||65;ctx.fillText(label,Math.max(6,Math.min(width-labelWidth-6,p[0]+offset[0])),Math.max(18,Math.min(height-7,p[1]+offset[1])));}
 function arrow(v,color,label,origin=[0,0,0],dashed=false,handle=null){
  if(use3D){window.vectorScene.arrow(v,color,label,origin,dashed);return;}
  const end=add(origin,v),a=screen(origin),b=screen(end);line(origin,end,color,2.5,dashed?[6,5]:[]);
@@ -115,8 +115,8 @@ function draw(){
   }else arrow(g.u,colors.u,'u',[0,0,0],false,'u');
   arrow(g.v,colors.v,'v',[0,0,0],false,'v');
   if(g.p){
-   if(g.parts?.length>1){let start=[0,0,0];g.parts.forEach((p,i)=>{arrow(p,'#16846a88',`p${subscript(i+1)}`,start,true);start=add(start,p);});}
-   arrow(g.p,colors.p,'p');arrow(g.r,colors.r,'r',g.p,true);
+   if(g.parts?.length>1){let start=[0,0,0];g.parts.forEach((p,i)=>{arrow(p,'#16846a88',`proj_q${subscript(i+1)}(v)`,start,true);start=add(start,p);});}
+   arrow(g.p,colors.p,'v_proj');arrow(g.r,colors.r,'v − v_proj',g.p,true);
    if(norm(g.p)>.15&&norm(g.r)>.15){const a=mul(g.p,-.22/norm(g.p)),b=mul(g.r,.22/norm(g.r));line(add(g.p,a),add(add(g.p,a),b),'#648b78');line(add(add(g.p,a),b),add(g.p,b),'#648b78');}
   }
  }else{
@@ -124,7 +124,7 @@ function draw(){
   if(step.kind!=='done')vectors.forEach((v,i)=>arrow(v,step.kind==='start'?[colors.u,colors.v,colors.r][i]:'#b5bfc066',`v${subscript(i+1)}`,[0,0,0],false,['u','v','c'][i]));
   const finished=step.kind==='done'?result.records.length:step.k??0;
   let qi=0;result.records.forEach((r,k)=>{if(r.q){qi++;if(k<finished||(step.kind==='normalize'&&step.k===k))arrow(r.q,colors.q,`q${subscript(qi)}`,[0,0,0],false);}});
-  if(step.k!==undefined){const r=result.records[step.k];let remaining=r.v.slice(),sum=[0,0,0];r.parts.slice(0,step.removed).forEach((p,j)=>{arrow(p,colors.u,`p${subscript(j+1)}`,sum,true);sum=add(sum,p);remaining=sub(remaining,p);});
+  if(step.k!==undefined){const r=result.records[step.k];let remaining=r.v.slice(),sum=[0,0,0];r.parts.slice(0,step.removed).forEach((p,j)=>{arrow(p,colors.u,`proj_q${subscript(j+1)}(v${subscript(step.k+1)})`,sum,true);sum=add(sum,p);remaining=sub(remaining,p);});
    if(step.removed){arrow(remaining,colors.r,'remainder',sum,true);arrow(remaining,colors.r,`u${subscript(step.k+1)}`);}
    if(step.kind==='take')arrow(r.v,colors.v,`v${subscript(step.k+1)}`);
    if(step.kind==='normalize'&&r.q)line(r.r,r.q,'#16846a88',1,[3,5]);

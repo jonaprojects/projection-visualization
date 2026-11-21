@@ -76,7 +76,7 @@ class VectorScene {
    const p=new THREE.Vector3(...tag.position).project(this.camera);if(p.z>1||p.z< -1||Math.abs(p.x)>.96||Math.abs(p.y)>.95)continue;
    const x=(p.x+1)*this.width/2,y=(1-p.y)*this.height/2,el=document.createElement('span');
    el.className='world-label';el.style.color=tag.color;
-   const tex=tag.text==='remainder'?'\\text{remainder}':tag.text.replace(/[₀₁₂₃]/g,x=>'_'+['₀','₁','₂','₃'].indexOf(x));
+   const tex=tag.text==='v_proj'?'v_{\\mathrm{proj}}':tag.text==='v − v_proj'?'v-v_{\\mathrm{proj}}':tag.text.startsWith('proj_q')?'\\operatorname{proj}_{'+tag.text.slice(5,7).replace(/[₀₁₂₃]/g,x=>'_'+['₀','₁','₂','₃'].indexOf(x))+'}'+tag.text.slice(7).replace(/[₀₁₂₃]/g,x=>'_'+['₀','₁','₂','₃'].indexOf(x)):tag.text==='remainder'?'\\text{remainder}':tag.text.replace(/[₀₁₂₃]/g,x=>'_'+['₀','₁','₂','₃'].indexOf(x));
    el.innerHTML=mathHTML(tex);this.labels.appendChild(el);
    const w=el.offsetWidth,h=el.offsetHeight;let chosen=null;
    for(const [dx,dy] of [tag.offset,[12,8],[-w-10,-h-6],[10,-h-25],[-w-10,12],[18,25]]){
